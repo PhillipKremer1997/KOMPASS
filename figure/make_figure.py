@@ -29,13 +29,18 @@ from matplotlib.patches import Rectangle
 # --------------------------------------------------------------------------
 PR3_ULN      = 2.0     # ULN of the anti-PR3 immunosorbent assay (manuscript)
 PR3_LLOQ     = 0.4     # limit of quantification; reported "0" is drawn here
-PULSE_CUTOFF = 250     # documented doses >= this value = i.v. GC pulse
-# chest CT timepoints, Figure 1A-C: 03/2025, 12/2025, 07/2026.  Only the month
-# is documented; A is anchored to the baseline date.       <<< exact dates?
+# Confirmed by the authors: doses >= 250 mg are i.v. pulses (drawn as arrows),
+# the 100 mg on rituximab days are oral, the daily dose is carried forward
+# between documented changes, and after a pulse the curve resumes at the next
+# documented oral dose.
+PULSE_CUTOFF = 250
+# Chest CT timepoints, Figure 1A-C: 03/2025, 12/2025, 07/2026.  Only the
+# month is documented; A is anchored to the baseline date, B and C are
+# placed mid-month.                                        <<< exact dates?
 SCANS        = {"A": -318, "B": -30, "C": 180}
-# teclistamab s.c. step-up per manuscript: d1 0.06, d3 0.3, d5/d12/d19/d26
-# 1.5 mg/kg  ->  days 0, 2, 4, 11, 18, 25 relative to the first dose.
-# NB the source spreadsheet notes "6x until 19-Feb-2026" (= day +36). <<< check
+# Teclistamab s.c. step-up per manuscript (confirmed by the authors):
+# d1 0.06, d3 0.3, d5/d12/d19/d26 1.5 mg/kg -> days 0, 2, 4, 11, 18, 25.
+# The spreadsheet note "6x until 19-Feb-2026" (day +36) is superseded.
 TEC  = [0, 2, 4, 11, 18, 25]
 TEC_WINDOW   = (0, 25)
 

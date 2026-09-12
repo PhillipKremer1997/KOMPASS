@@ -36,35 +36,36 @@ within three months and to 2 mg/day at six months after teclistamab.
 
 ---
 
-## Resolved from the manuscript and the slide deck
+## Settled
 
 | Item | Value used |
 |------|-----------|
 | Assay ULN, anti-PR3 | < 2 U/mL (immunosorbent assay) — Figure 3B caption |
-| Teclistamab schedule | d1 0.06, d3 0.3, d5/d12/d19/d26 1.5 mg/kg → days 0, 2, 4, 11, 18, 25 |
+| Teclistamab schedule | d1 0.06, d3 0.3, d5/d12/d19/d26 1.5 mg/kg → days 0, 2, 4, 11, 18, 25. Confirmed by the authors; the spreadsheet note "6x until 19-Feb-2026" is superseded |
 | Imaging marks | chest CT, not PET/CT — Figure 1A–C |
 | Figure number | Figure 3 (merges former 3A and 3B) |
+| Prednisolone between visits | last documented dose carried forward — confirmed |
+| i.v. pulses | doses ≥ 250 mg, drawn as arrows; 100 mg on rituximab days counted as oral — confirmed |
+| After a pulse | curve resumes at the next documented oral dose — confirmed |
+| CD19 annotation | stays; the manuscript text on "complete B-cell depletion" is being adjusted |
 
 ## Still open
 
-1. **Teclistamab dates conflict.** The manuscript schedule ends on d26
-   (day +25, 8 Feb 2026); the spreadsheet notes "TEC 6x until 19-Feb-2026"
-   (day +36). Which is correct? The figure currently follows the
-   manuscript.
-2. **Chest CT dates.** Only months are documented (03/2025, 12/2025,
+1. **Chest CT dates.** Only months are documented (03/2025, 12/2025,
    07/2026). A is anchored to the baseline date; B is placed at 15 Dec
    2025 (day −30) and C at day +180. Exact dates needed.
-3. **Bronchoscopy and biopsy timepoints** (Figures 2A–D, Figure 4
+2. **Bronchoscopy and biopsy timepoints** (Figures 2A–D, Figure 4
    pre/post). The slide deck still asks "Datum?" for the histology. With
    those dates a second marker row in panel A would tie Figures 1, 2 and 4
    to this timeline.
-4. **CRP.** The text states CRP normalized after teclistamab, but CRP is
+3. **CRP.** The text states CRP normalized after teclistamab, but CRP is
    not in the data file. As the only objective systemic inflammation
-   marker it would strengthen panel B or a further panel.
-5. **IgG levels / IVIG substitutions.** Hypogammaglobulinemia requiring
+   marker it would strengthen the figure and the claim.
+4. **IgG levels / IVIG substitutions.** Hypogammaglobulinemia requiring
    repeated IVIG is reported as the main adverse event; dates and IgG
    values would make a useful safety row or panel.
-6. **Daily prednisolone between visits** — currently last documented dose
-   carried forward. Provide the full taper for an exact curve.
-7. **Pulse duration** — doses ≥ 250 mg are treated as i.v. pulses; how
-   many days per pulse course?
+5. **CRS / ICANS.** No explicit statement in the manuscript. Reviewers of
+   a T-cell-engager report will expect one; any events belong in panel A.
+6. **Figure cross-references.** The text cites "[Figure 3A]" and
+   "[Figure 3B]"; the former 3B held both anti-PR3 and CD19, which are now
+   panels B and C.
