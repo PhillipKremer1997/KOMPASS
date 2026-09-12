@@ -1,0 +1,6 @@
+# Patient-level data and rendered figures are not kept under version control.
+figure/data/
+figure/*.png
+figure/*.pdf
+figure/*.svg
+__pycache__/
