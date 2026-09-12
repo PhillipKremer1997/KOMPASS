@@ -140,8 +140,8 @@ def timemarks(ax):
 # --------------------------------------------------------------------------
 # 4.  FIGURE
 # --------------------------------------------------------------------------
-fig = plt.figure(figsize=(7.09, 7.0))          # 180 mm journal width
-gs = fig.add_gridspec(5, 1, height_ratios=[2.6, 0.45, 1.5, 0.95, 1.15],
+fig = plt.figure(figsize=(7.09, 7.35))          # 180 mm journal width
+gs = fig.add_gridspec(5, 1, height_ratios=[2.6, 0.45, 1.5, 0.95, 1.5],
                       hspace=0.30, left=0.165, right=0.975,
                       top=0.925, bottom=0.072)
 axT = fig.add_subplot(gs[0])
@@ -271,19 +271,21 @@ for x, v in zip(px[1:], py[1:]):
 if cur:
     groups.append(cur)
 
-YMAX, YARR = 60, 66
+# the axis has to reach 100: the two oral 100 mg doses on rituximab days
+# were cut off by the earlier 60 mg limit
+YMAX, YARR = 105, 115.5
 for g in groups:
     gx = float(np.mean([x for x, _ in g]))
-    axP.plot([gx, gx], [YARR - 4.5, YARR], color=C["pred"], lw=0.7,
+    axP.plot([gx, gx], [YARR - 7.9, YARR], color=C["pred"], lw=0.7,
              clip_on=False, zorder=4)
-    axP.plot(gx, YARR - 5.5, marker="v", ms=4.2, color=C["pred"],
+    axP.plot(gx, YARR - 9.6, marker="v", ms=4.2, color=C["pred"],
              clip_on=False, zorder=4)
-    axP.text(gx, YARR + 0.8, ", ".join(str(int(v)) for _, v in g), ha="center",
+    axP.text(gx, YARR + 1.4, ", ".join(str(int(v)) for _, v in g), ha="center",
              va="bottom", fontsize=5.8, color=C["pred"], clip_on=False)
-axP.text(XLIM[1] - 4, YARR + 0.8, "i.v. methylprednisolone pulses (mg)",
+axP.text(XLIM[1] - 4, YARR + 1.4, "i.v. methylprednisolone pulses (mg)",
          ha="right", va="bottom", fontsize=6, color=C["pred"], clip_on=False)
 
-axP.set_ylim(0, YMAX); axP.set_yticks([0, 20, 40, 60])
+axP.set_ylim(0, YMAX); axP.set_yticks([0, 25, 50, 75, 100])
 axP.set_ylabel("Prednisolone\n(mg/day)")
 axP.yaxis.set_label_coords(-0.115, 0.40)
 axP.spines["top"].set_visible(False); axP.spines["right"].set_visible(False)

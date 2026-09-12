@@ -71,7 +71,7 @@ alpha <- function(col, a) {
 
 # panel rectangles in device coordinates, matching the matplotlib gridspec
 # (height_ratios 2.6/0.45/1.5/0.95/1.15, hspace 0.30, top 0.925, bottom 0.072)
-ratios <- c(2.6, 0.45, 1.5, 0.95, 1.15)
+ratios <- c(2.6, 0.45, 1.5, 0.95, 1.5)
 Htot   <- 0.925 - 0.072
 axtot  <- Htot / (1 + 4 * 0.30 / length(ratios))
 gap    <- 0.30 * axtot / length(ratios)
@@ -273,7 +273,7 @@ draw <- function() {
       segments(u[1] - 0.007 * (u[2] - u[1]), u[3] + 0.94 * (u[4] - u[3]),
                u[1] + 0.007 * (u[2] - u[1]), u[3] + 1.14 * (u[4] - u[3]),
                lwd = LW(0.7), xpd = NA)
-      ytitle("Anti-PR3 IgG (U/mL)", -406.29, 18.771)
+      ytitle("Anti-PR3 IgG (U/mL)", -406.37, 18.672)
     } else {
       segments(u[1] - 0.007 * (u[2] - u[1]), u[3] - 0.16 * (u[4] - u[3]),
                u[1] + 0.007 * (u[2] - u[1]), u[3] + 0.16 * (u[4] - u[3]),
@@ -296,8 +296,12 @@ draw <- function() {
   pletter("C", dy = 1.06)
 
   ## ---- D  glucocorticoids --------------------------------------------------
+  # the axis has to reach 100: the two oral 100 mg doses on rituximab days
+  # were cut off by the earlier 60 mg limit
+  YMAX <- 105; YARR <- 115.5
+
   s <- step_series(day, pred)
-  panel("P", c(0, 60))
+  panel("P", c(0, YMAX))
   timemarks()
   xs <- c(s$ox, tail(day, 1)); ys <- c(s$oy, tail(s$oy, 1))
   sp <- step_xy(xs, ys)
@@ -310,26 +314,25 @@ draw <- function() {
   # i.v. pulses as arrows in a strip above the axis; pulses given within
   # 10 days of each other are pooled into one arrow
   grp <- cumsum(c(TRUE, diff(s$px) > 10))
-  YARR <- 66
   for (g in split(seq_along(s$px), grp)) {
     gx <- mean(s$px[g])
-    segments(gx, YARR - 4.5, gx, YARR, col = CO["pred"], lwd = LW(0.7),
+    segments(gx, YARR - 7.9, gx, YARR, col = CO["pred"], lwd = LW(0.7),
              xpd = NA)
-    points(gx, YARR - 5.5, pch = 25, cex = MS(4.2), col = CO["pred"],
+    points(gx, YARR - 9.6, pch = 25, cex = MS(4.2), col = CO["pred"],
            bg = CO["pred"], xpd = NA)
-    lab(gx, YARR + 0.8, paste(as.integer(s$py[g]), collapse = ", "),
+    lab(gx, YARR + 1.4, paste(as.integer(s$py[g]), collapse = ", "),
         ha = "centre", cex = CX(5.8), col = CO["pred"])
   }
-  lab(XLIM[2] - 4, YARR + 0.8, "i.v. methylprednisolone pulses (mg)",
+  lab(XLIM[2] - 4, YARR + 1.4, "i.v. methylprednisolone pulses (mg)",
       ha = "right", cex = CX(6), col = CO["pred"])
 
-  spine_l(c(0, 60)); spine_b(0); yticks(seq(0, 60, 20))
+  spine_l(c(0, YMAX)); spine_b(0); yticks(seq(0, 100, 25))
   axis(1, at = XTICKS, lwd = 0, lwd.ticks = LW(0.7), tcl = tick(2.8),
        mgp = c(3, 0.15, 0), cex.axis = 1)
   axis(1, at = seq(-330, 200, 30), labels = FALSE, lwd = 0,
        lwd.ticks = LW(0.6), tcl = tick(1.6))
-  ytitle(c("Prednisolone", "(mg/day)"), -412.48, 23.960)
-  lab(-66.48, -19.870, "Days relative to first teclistamab dose", ha = "centre",
+  ytitle(c("Prednisolone", "(mg/day)"), -412.48, 42.134)
+  lab(-66.48, -26.575, "Days relative to first teclistamab dose", ha = "centre",
       va = "centre", cex = CX(7.5))
   pletter("D", dy = 1.06)
 }
@@ -337,12 +340,12 @@ draw <- function() {
 # cairo_pdf, not pdf(): the default PDF encoding cannot represent the arrow
 # and multiplication sign in the dose labels
 if (capabilities("cairo")) {
-  cairo_pdf(file.path(OUT, "Figure3_R.pdf"), width = 7.09, height = 7.0)
+  cairo_pdf(file.path(OUT, "Figure3_R.pdf"), width = 7.09, height = 7.35)
 } else {
-  pdf(file.path(OUT, "Figure3_R.pdf"), width = 7.09, height = 7.0,
+  pdf(file.path(OUT, "Figure3_R.pdf"), width = 7.09, height = 7.35,
       useDingbats = FALSE, encoding = "ISOLatin1")
 }
 draw(); invisible(dev.off())
-png(file.path(OUT, "Figure3_R.png"), width = 7.09, height = 7.0, units = "in",
+png(file.path(OUT, "Figure3_R.png"), width = 7.09, height = 7.35, units = "in",
     res = 600, type = "cairo", bg = "white"); draw(); invisible(dev.off())
 cat("ok\n")

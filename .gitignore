@@ -4,3 +4,4 @@ figure/*.png
 figure/*.pdf
 figure/*.svg
 __pycache__/
+figure/*.zip
