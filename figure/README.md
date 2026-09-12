@@ -49,9 +49,19 @@ is ever rescaled.
 
 ## Running it in RStudio
 
-Open `KOMPASS-Figure3.Rproj` first - the scripts resolve `data/` relative to
-the working directory, which the project sets for you. Then Source
-`make_figure.R` or `make_figure_ggplot.R`. The project is set to UTF-8,
-which the dose labels need (they contain × and →).
+Open `KOMPASS-Figure3.Rproj`, then Source `make_figure.R` or
+`make_figure_ggplot.R`. Each script locates its own folder (Rscript, the
+Source button and `source()` from the console are all handled) and reads
+`data/` from there, so the working directory does not matter; if the folder
+is missing the script says so and names the two places it looked.
 
     install.packages(c("ggplot2", "patchwork"))   # only for the ggplot version
+
+The project is set to UTF-8, which the dose labels need (they contain × and
+→). R 4.2 or newer is recommended: earlier versions on Windows did not use
+UTF-8 natively and mangle those two characters.
+
+Fonts: the scripts ask for `sans`, which is Arial on Windows and Helvetica
+on macOS - what journals want. On Linux `sans` is DejaVu Sans, so Liberation
+Sans is requested instead when present. Change `FAM` near the top of either
+script to use a different face.

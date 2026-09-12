@@ -33,15 +33,38 @@ PR3_LLOQ     <- 0.4   # limit of quantification; reported "0" is drawn here
 # documented oral dose.
 PULSE_CUTOFF <- 250
 
-args <- commandArgs(trailingOnly = FALSE)
-OUT  <- dirname(sub("^--file=", "", grep("^--file=", args, value = TRUE)[1]))
-if (is.na(OUT) || OUT == "") OUT <- "."          # e.g. sourced in RStudio
+# ---- where is this script, and where is its data? --------------------------
+# Resolves for Rscript, for RStudio's Source button, and for source() from the
+# console, then falls back to the working directory.
+script_dir <- function() {
+  f <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(f)) return(dirname(normalizePath(sub("^--file=", "", f[1]))))
+  for (i in rev(seq_len(sys.nframe()))) {           # source() keeps it here
+    of <- get0("ofile", envir = sys.frame(i), ifnotfound = NULL)
+    if (is.character(of) && length(of) == 1L && nzchar(of))
+      return(dirname(normalizePath(of)))
+  }
+  if (requireNamespace("rstudioapi", quietly = TRUE) &&
+      isTRUE(try(rstudioapi::isAvailable(), silent = TRUE))) {
+    p <- try(rstudioapi::getSourceEditorContext()$path, silent = TRUE)
+    if (!inherits(p, "try-error") && is.character(p) && nzchar(p))
+      return(dirname(normalizePath(p)))
+  }
+  getwd()
+}
+
+OUT  <- script_dir()
 DATA <- file.path(OUT, "data")
+if (!dir.exists(DATA)) DATA <- file.path(getwd(), "data")
 if (!dir.exists(DATA))
-  stop(sprintf(paste0("missing data directory: %s\n",
-       "Patient-level data are kept out of the repository. Restore ",
-       "observations.csv, treatments.csv and timepoints.csv from the ",
-       "source spreadsheet before running this script."), DATA), call. = FALSE)
+  stop("cannot find the data folder.\n",
+       "  looked next to the script: ", file.path(OUT, "data"), "\n",
+       "  and in the working dir:    ", file.path(getwd(), "data"), "\n\n",
+       "Put observations.csv, treatments.csv and timepoints.csv into a folder\n",
+       "named 'data' next to this script and run it again. In RStudio, open\n",
+       "KOMPASS-Figure3.Rproj first, then press Source.\n",
+       "Patient-level data are deliberately kept out of the repository.",
+       call. = FALSE)
 
 # ---- 1. data ---------------------------------------------------------------
 rd <- function(f) read.csv(file.path(DATA, f), colClasses = "character",
@@ -75,7 +98,11 @@ CO <- c(plex = "#9E6BA8", cyc = "#E1A33C", rtx = "#4C9F70", ava = "#8C8C8C",
         pred = "#2B5FA8", grey = "#595959", rail = "#EDEDED")
 TX$colour <- CO[setNames(c("plex", "cyc", "rtx", "ava", "dara", "tec"),
                          lanes)[TX$agent]]
-FAM <- "Liberation Sans"      # the family matplotlib resolves Arial to here
+# Journals ask for Arial or Helvetica. "sans" already resolves to Arial on
+# Windows and to Helvetica on macOS; only Linux needs a hint, where Liberation
+# Sans is the metric-compatible stand-in for Arial. Override if you prefer
+# another face - nothing else in the script depends on it.
+FAM <- if (Sys.info()[["sysname"]] == "Linux") "Liberation Sans" else "sans"
 MU  <- intToUtf8(0xB5)        # micro sign, independent of the source encoding
 
 lw <- function(pt) pt / .pt   # line width in pt -> ggplot linewidth
@@ -177,12 +204,12 @@ pA <- ggplot() +
   scale_y(breaks = c(rev(rails$y), TOP), labels = c(rev(lanes), TP$kind[1])) +
   zoom(c(-0.55, length(lanes) + 0.15)) +
   theme_fig(axis.line = element_blank(), axis.ticks = element_blank()) +
-  # one colour per break, so the imaging row reads as grey; ggplot warns that
-  # vectorised element_text input is unsupported, which is expected here
-  theme(axis.text.y = element_text(size = 7, hjust = 1,
-                                   margin = margin(r = 2.2),
-                                   colour = c(rep("black", length(lanes)),
-                                              CO[["grey"]])))
+  # one colour per break, so the imaging row reads as grey. ggplot warns that
+  # vectorised element_text input is unsupported; it works, and the warning is
+  # silenced here rather than printed on every run
+  theme(axis.text.y = suppressWarnings(
+    element_text(size = 7, hjust = 1, margin = margin(r = 2.2),
+                 colour = c(rep("black", length(lanes)), CO[["grey"]]))))
 
 # ---- 4. panel B : anti-PR3 IgG (broken axis) -------------------------------
 pr3 <- subset(obs, !is.na(pr3))
@@ -289,8 +316,11 @@ fig <- pA / pB_up / pB_lo / pC / pD +
   plot_layout(heights = c(2.81, 0.45, 1.5, 0.95, 1.74)) +
   plot_annotation(tag_levels = list(c("A", "B", "", "C", "D")))
 
-ggsave(file.path(OUT, "Figure3_ggplot.pdf"), fig, device = cairo_pdf,
+# cairo_pdf, not pdf(): the default PDF encoding cannot represent the arrow
+# and multiplication sign in the dose labels
+ggsave(file.path(OUT, "Figure3_ggplot.pdf"), fig,
+       device = if (capabilities("cairo")) cairo_pdf else grDevices::pdf,
        width = 7.09, height = 7.35)
 ggsave(file.path(OUT, "Figure3_ggplot.png"), fig, width = 7.09, height = 7.35,
-       dpi = 600, bg = "white", type = "cairo")
+       dpi = 600, bg = "white")
 cat("ok\n")

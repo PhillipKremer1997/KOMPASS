@@ -23,15 +23,38 @@ PR3_LLOQ     <- 0.4   # limit of quantification; reported "0" is drawn here
 # documented oral dose.
 PULSE_CUTOFF <- 250
 
-args <- commandArgs(trailingOnly = FALSE)
-OUT  <- dirname(sub("^--file=", "", grep("^--file=", args, value = TRUE)[1]))
-if (is.na(OUT) || OUT == "") OUT <- "."
+# ---- where is this script, and where is its data? --------------------------
+# Resolves for Rscript, for RStudio's Source button, and for source() from the
+# console, then falls back to the working directory.
+script_dir <- function() {
+  f <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(f)) return(dirname(normalizePath(sub("^--file=", "", f[1]))))
+  for (i in rev(seq_len(sys.nframe()))) {           # source() keeps it here
+    of <- get0("ofile", envir = sys.frame(i), ifnotfound = NULL)
+    if (is.character(of) && length(of) == 1L && nzchar(of))
+      return(dirname(normalizePath(of)))
+  }
+  if (requireNamespace("rstudioapi", quietly = TRUE) &&
+      isTRUE(try(rstudioapi::isAvailable(), silent = TRUE))) {
+    p <- try(rstudioapi::getSourceEditorContext()$path, silent = TRUE)
+    if (!inherits(p, "try-error") && is.character(p) && nzchar(p))
+      return(dirname(normalizePath(p)))
+  }
+  getwd()
+}
+
+OUT  <- script_dir()
 DATA <- file.path(OUT, "data")
+if (!dir.exists(DATA)) DATA <- file.path(getwd(), "data")
 if (!dir.exists(DATA))
-  stop(sprintf(paste0("missing data directory: %s\n",
-       "Patient-level data are kept out of the repository. Restore ",
-       "observations.csv, treatments.csv and timepoints.csv from the ",
-       "source spreadsheet before running this script."), DATA), call. = FALSE)
+  stop("cannot find the data folder.\n",
+       "  looked next to the script: ", file.path(OUT, "data"), "\n",
+       "  and in the working dir:    ", file.path(getwd(), "data"), "\n\n",
+       "Put observations.csv, treatments.csv and timepoints.csv into a folder\n",
+       "named 'data' next to this script and run it again. In RStudio, open\n",
+       "KOMPASS-Figure3.Rproj first, then press Source.\n",
+       "Patient-level data are deliberately kept out of the repository.",
+       call. = FALSE)
 
 # ---- 1. data ---------------------------------------------------------------
 rd <- function(f) read.csv(file.path(DATA, f), colClasses = "character",
@@ -60,6 +83,12 @@ CO <- c(plex = "#9E6BA8", cyc = "#E1A33C", rtx = "#4C9F70", ava = "#8C8C8C",
         dara = "#3E8FC4", tec = "#C0392B", pr3 = "#B2182B", cd19 = "#0E7C7B",
         pred = "#2B5FA8", grey = "#595959", rail = "#EDEDED")
 LANE_COLOUR <- setNames(c("plex", "cyc", "rtx", "ava", "dara", "tec"), lanes)
+
+# Journals ask for Arial or Helvetica. "sans" already resolves to Arial on
+# Windows and to Helvetica on macOS; only Linux needs a hint, where Liberation
+# Sans is the metric-compatible stand-in for Arial. Override if you prefer
+# another face - nothing else in the script depends on it.
+FAM <- if (Sys.info()[["sysname"]] == "Linux") "Liberation Sans" else "sans"
 
 LW <- function(pt) pt * 96 / 72          # matplotlib points -> R lwd units
 CX <- function(pt) pt / 7                # point size -> cex (base ps = 7)
@@ -187,10 +216,7 @@ step_xy <- function(x, y) {          # "post" steps, as polygon/line vertices
 
 # ---- 4. figure -------------------------------------------------------------
 draw <- function() {
-  # the same family matplotlib resolves to, so glyph metrics match
-  fam <- if ("Liberation Sans" %in% names(pdfFonts()) ||
-             capabilities("cairo")) "Liberation Sans" else "sans"
-  par(ps = 7, family = fam, lend = "butt", xpd = FALSE)
+  par(ps = 7, family = FAM, lend = "butt", xpd = FALSE)
 
   ## ---- A  treatment timeline ----------------------------------------------
   ymap <- setNames(rev(seq_along(lanes)) - 1, lanes)
@@ -346,6 +372,12 @@ if (capabilities("cairo")) {
       useDingbats = FALSE, encoding = "ISOLatin1")
 }
 draw(); invisible(dev.off())
-png(file.path(OUT, "Figure3_R.png"), width = 7.09, height = 7.35, units = "in",
-    res = 600, type = "cairo", bg = "white"); draw(); invisible(dev.off())
+if (capabilities("cairo")) {
+  png(file.path(OUT, "Figure3_R.png"), width = 7.09, height = 7.35,
+      units = "in", res = 600, type = "cairo", bg = "white")
+} else {
+  png(file.path(OUT, "Figure3_R.png"), width = 7.09, height = 7.35,
+      units = "in", res = 600, bg = "white")
+}
+draw(); invisible(dev.off())
 cat("ok\n")
