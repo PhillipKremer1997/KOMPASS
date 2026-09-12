@@ -298,6 +298,8 @@ for ax in (axT, axU, axL, axB):
 axP.set_xlabel("Days relative to first teclistamab dose")
 
 for ext in ("pdf", "png", "svg"):
+    # no bbox_inches="tight": the nominal 7.09 x 7.0 in canvas is what
+    # make_figure.R also produces, so the two outputs are interchangeable
     fig.savefig(OUT / f"Figure3.{ext}", dpi=600 if ext == "png" else None,
-                bbox_inches="tight", facecolor="white")
+                facecolor="white")
 print("ok")
