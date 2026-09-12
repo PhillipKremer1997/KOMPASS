@@ -62,6 +62,13 @@ The project is set to UTF-8, which the dose labels need (they contain × and
 UTF-8 natively and mangle those two characters.
 
 Fonts: the scripts ask for `sans`, which is Arial on Windows and Helvetica
-on macOS - what journals want. On Linux `sans` is DejaVu Sans, so Liberation
-Sans is requested instead when present. Change `FAM` near the top of either
-script to use a different face.
+on macOS - what journals want. Only on Linux with cairo is Liberation Sans
+requested instead, because there `sans` means DejaVu Sans. Change `FAM` near
+the top of either script to use a different face; it has to be a family the
+output device knows, or a plain `pdf()` stops with "invalid font type".
+
+Devices: PDF and PNG are opened by `open_pdf()` / `open_png()`, which try
+quartz first on macOS, then cairo, then a plain `pdf()` / `png()`. That
+order matters - a Mac without XQuartz has no cairo at all, and merely asking
+`capabilities("cairo")` there loads the X11 module and warns. The last
+resort cannot encode × and →, and says so.

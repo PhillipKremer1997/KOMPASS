@@ -84,11 +84,13 @@ CO <- c(plex = "#9E6BA8", cyc = "#E1A33C", rtx = "#4C9F70", ava = "#8C8C8C",
         pred = "#2B5FA8", grey = "#595959", rail = "#EDEDED")
 LANE_COLOUR <- setNames(c("plex", "cyc", "rtx", "ava", "dara", "tec"), lanes)
 
-# Journals ask for Arial or Helvetica. "sans" already resolves to Arial on
-# Windows and to Helvetica on macOS; only Linux needs a hint, where Liberation
-# Sans is the metric-compatible stand-in for Arial. Override if you prefer
-# another face - nothing else in the script depends on it.
-FAM <- if (Sys.info()[["sysname"]] == "Linux") "Liberation Sans" else "sans"
+# Journals ask for Arial or Helvetica. "sans" is Arial on Windows, Helvetica on
+# macOS quartz, and Helvetica in a plain pdf() - all fine. Only cairo on Linux
+# maps "sans" to DejaVu Sans, so there Liberation Sans (metric-compatible with
+# Arial) is asked for instead. The family has to be one the chosen device
+# knows: a plain pdf() errors with "invalid font type" on anything else.
+FAM <- if (Sys.info()[["sysname"]] == "Linux" &&
+           isTRUE(suppressWarnings(capabilities("cairo")))) "Liberation Sans" else "sans"
 
 LW <- function(pt) pt * 96 / 72          # matplotlib points -> R lwd units
 CX <- function(pt) pt / 7                # point size -> cex (base ps = 7)
@@ -363,21 +365,45 @@ draw <- function() {
   pletter("D", dy = 1.06)
 }
 
-# cairo_pdf, not pdf(): the default PDF encoding cannot represent the arrow
-# and multiplication sign in the dose labels
-if (capabilities("cairo")) {
-  cairo_pdf(file.path(OUT, "Figure3_R.pdf"), width = 7.09, height = 7.35)
-} else {
-  pdf(file.path(OUT, "Figure3_R.pdf"), width = 7.09, height = 7.35,
-      useDingbats = FALSE, encoding = "ISOLatin1")
+# ---- output devices --------------------------------------------------------
+# macOS first, on purpose: quartz handles UTF-8 (the labels contain × and →)
+# and needs no XQuartz, while asking for cairo on a Mac without XQuartz loads
+# the X11 module and warns. Linux and Windows then use cairo, and a plain
+# pdf() is the last resort - it cannot encode the arrow glyph.
+open_pdf <- function(file, w, h) {
+  if (capabilities("aqua")) {
+    ok <- tryCatch({ grDevices::quartz(file = file, type = "pdf",
+                                       width = w, height = h); TRUE },
+                   error = function(e) FALSE)
+    if (ok) return(invisible("quartz"))
+  }
+  if (isTRUE(suppressWarnings(capabilities("cairo")))) {
+    grDevices::cairo_pdf(file, width = w, height = h)
+    return(invisible("cairo"))
+  }
+  grDevices::pdf(file, width = w, height = h, useDingbats = FALSE,
+                 encoding = "ISOLatin1")
+  warning("no quartz or cairo PDF device: × and → will not render in the PDF",
+          call. = FALSE)
+  invisible("pdf")
 }
-draw(); invisible(dev.off())
-if (capabilities("cairo")) {
-  png(file.path(OUT, "Figure3_R.png"), width = 7.09, height = 7.35,
-      units = "in", res = 600, type = "cairo", bg = "white")
-} else {
-  png(file.path(OUT, "Figure3_R.png"), width = 7.09, height = 7.35,
-      units = "in", res = 600, bg = "white")
+
+open_png <- function(file, w, h, res = 600) {
+  a <- list(filename = file, width = w, height = h, units = "in",
+            res = res, bg = "white")
+  if (capabilities("aqua")) {
+    ok <- tryCatch({ do.call(grDevices::png, c(a, type = "quartz")); TRUE },
+                   error = function(e) FALSE)
+    if (ok) return(invisible("quartz"))
+  }
+  if (isTRUE(suppressWarnings(capabilities("cairo")))) {
+    do.call(grDevices::png, c(a, type = "cairo"))
+    return(invisible("cairo"))
+  }
+  do.call(grDevices::png, a)
+  invisible("default")
 }
-draw(); invisible(dev.off())
+
+open_pdf(file.path(OUT, "Figure3_R.pdf"), 7.09, 7.35); draw(); invisible(dev.off())
+open_png(file.path(OUT, "Figure3_R.png"), 7.09, 7.35); draw(); invisible(dev.off())
 cat("ok\n")
