@@ -16,7 +16,7 @@
 # wider; and ggplot2 < 3.5 cannot draw minor tick marks, so the x axis has
 # major ticks only.
 #
-# Output: Figure3_ggplot.pdf (vector, for submission), .png (600 dpi)
+# Output: TEC_GPA_ggplot.pdf (vector, for submission), .png (600 dpi)
 # ---------------------------------------------------------------------------
 
 suppressPackageStartupMessages({
@@ -98,13 +98,13 @@ CO <- c(plex = "#9E6BA8", cyc = "#E1A33C", rtx = "#4C9F70", ava = "#8C8C8C",
         pred = "#2B5FA8", grey = "#595959", rail = "#EDEDED")
 TX$colour <- CO[setNames(c("plex", "cyc", "rtx", "ava", "dara", "tec"),
                          lanes)[TX$agent]]
-# Journals ask for Arial or Helvetica. "sans" is Arial on Windows, Helvetica on
-# macOS quartz, and Helvetica in a plain pdf() - all fine. Only cairo on Linux
-# maps "sans" to DejaVu Sans, so there Liberation Sans (metric-compatible with
-# Arial) is asked for instead. The family has to be one the chosen device
-# knows: a plain pdf() errors with "invalid font type" on anything else.
-FAM <- if (Sys.info()[["sysname"]] == "Linux" &&
-           isTRUE(suppressWarnings(capabilities("cairo")))) "Liberation Sans" else "sans"
+# Arial, as requested. macOS (quartz) and Windows (GDI) resolve it directly;
+# on Linux fontconfig substitutes the metric-compatible Liberation Sans. Only a
+# plain pdf() has to fall back to "sans", because it knows just its own
+# PostScript families and aborts with "invalid font type" on anything else.
+FAM <- if (isTRUE(suppressWarnings(capabilities("aqua"))) ||
+           .Platform$OS.type == "windows" ||
+           isTRUE(suppressWarnings(capabilities("cairo")))) "Arial" else "sans"
 MU  <- intToUtf8(0xB5)        # micro sign, independent of the source encoding
 
 lw <- function(pt) pt / .pt   # line width in pt -> ggplot linewidth
@@ -260,9 +260,6 @@ pC <- ggplot() + timemarks() +
             linewidth = lw(1.2)) +
   geom_point(data = cd19, aes(day, cd19), shape = 22, fill = CO[["cd19"]],
              colour = "white", stroke = lw(0.5), size = gs(3.0)) +
-  annotate("text", x = -140, y = 22, hjust = 1, vjust = 0.5, lineheight = 1.2,
-           label = "B-cell repopulation\nbefore relapse", size = gs(5.9),
-           colour = CO[["cd19"]], family = FAM) +
   scale_x() +
   scale_y(name = paste0("CD19+ B cells\n(cells/", MU, "L)"), breaks = c(0, 10, 20)) +
   zoom(c(-1.8, 28)) +
@@ -357,8 +354,8 @@ open_png <- function(file, w, h, res = 600) {
   invisible("default")
 }
 
-open_pdf(file.path(OUT, "Figure3_ggplot.pdf"), 7.09, 7.35)
+open_pdf(file.path(OUT, "TEC_GPA_ggplot.pdf"), 7.09, 7.35)
 print(fig); invisible(dev.off())
-open_png(file.path(OUT, "Figure3_ggplot.png"), 7.09, 7.35)
+open_png(file.path(OUT, "TEC_GPA_ggplot.png"), 7.09, 7.35)
 print(fig); invisible(dev.off())
 cat("ok\n")

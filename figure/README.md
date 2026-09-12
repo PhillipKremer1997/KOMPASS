@@ -1,4 +1,4 @@
-# Figure 3 — Teclistamab in refractory pulmonary GPA
+# TEC_GPA (Figure 3) — Teclistamab in refractory pulmonary GPA
 
 Day 0 = first teclistamab dose.
 
@@ -10,17 +10,17 @@ Day 0 = first teclistamab dose.
 control (see `.gitignore`), as are the rendered figures. Restore it from
 the source spreadsheet (`Therapie.xlsx`) before running the script.
 
-    python3 make_figure.py          # writes Figure3.pdf / .png / .svg
-    Rscript  make_figure.R           # writes Figure3_R.pdf / .png
-    Rscript  make_figure_ggplot.R    # writes Figure3_ggplot.pdf / .png
+    python3 make_figure.py          # writes TEC_GPA.pdf / .png / .svg
+    Rscript  make_figure.R           # writes TEC_GPA_R.pdf / .png
+    Rscript  make_figure_ggplot.R    # writes TEC_GPA_ggplot.pdf / .png
 
 Outputs
-* `Figure3.pdf` — vector, 180 mm wide, fonts embedded (Type 42); submission file
-* `Figure3.png` — 600 dpi raster, for drafts and slides
-* `Figure3.svg` — editable text, for import into BioRender / Illustrator
+* `TEC_GPA.pdf` — vector, 180 mm wide, fonts embedded (Type 42); submission file
+* `TEC_GPA.png` — 600 dpi raster, for drafts and slides
+* `TEC_GPA.svg` — editable text, for import into BioRender / Illustrator
 
 All assumptions are parameters at the top of the script (section 0) and are
-listed in `Figure3_legend.md`.
+listed in `TEC_GPA_legend.md`.
 
 ## The three versions
 
@@ -49,7 +49,7 @@ is ever rescaled.
 
 ## Running it in RStudio
 
-Open `KOMPASS-Figure3.Rproj`, then Source `make_figure.R` or
+Open `TEC_GPA.Rproj`, then Source `make_figure.R` or
 `make_figure_ggplot.R`. Each script locates its own folder (Rscript, the
 Source button and `source()` from the console are all handled) and reads
 `data/` from there, so the working directory does not matter; if the folder

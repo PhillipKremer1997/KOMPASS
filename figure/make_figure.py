@@ -14,7 +14,7 @@ Panel D  glucocorticoid exposure
 Style reference: NEJM / Nature Medicine / Ann Rheum Dis reports on CAR-T and
 T-cell-engager therapy in autoimmune disease.
 
-Output: Figure3.pdf (vector, for submission), .png (600 dpi), .svg (BioRender)
+Output: TEC_GPA.pdf (vector, for submission), .png (600 dpi), .svg (BioRender)
 """
 import csv
 from pathlib import Path
@@ -248,8 +248,6 @@ axB.yaxis.set_label_coords(-0.115, 0.5)
 axB.spines["top"].set_visible(False); axB.spines["right"].set_visible(False)
 axB.tick_params(axis="x", labelbottom=False)
 timemarks(axB)
-axB.text(-140, 22, "B-cell repopulation\nbefore relapse", ha="right",
-         va="center", fontsize=5.9, color=C["cd19"])
 letter(axB, "C", dy=1.06)
 
 # ---------- D  glucocorticoids --------------------------------------------
@@ -302,6 +300,6 @@ axP.set_xlabel("Days relative to first teclistamab dose")
 for ext in ("pdf", "png", "svg"):
     # no bbox_inches="tight": the nominal 7.09 x 7.0 in canvas is what
     # make_figure.R also produces, so the two outputs are interchangeable
-    fig.savefig(OUT / f"Figure3.{ext}", dpi=600 if ext == "png" else None,
+    fig.savefig(OUT / f"TEC_GPA.{ext}", dpi=600 if ext == "png" else None,
                 facecolor="white")
 print("ok")

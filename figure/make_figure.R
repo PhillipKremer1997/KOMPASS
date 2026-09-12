@@ -84,13 +84,13 @@ CO <- c(plex = "#9E6BA8", cyc = "#E1A33C", rtx = "#4C9F70", ava = "#8C8C8C",
         pred = "#2B5FA8", grey = "#595959", rail = "#EDEDED")
 LANE_COLOUR <- setNames(c("plex", "cyc", "rtx", "ava", "dara", "tec"), lanes)
 
-# Journals ask for Arial or Helvetica. "sans" is Arial on Windows, Helvetica on
-# macOS quartz, and Helvetica in a plain pdf() - all fine. Only cairo on Linux
-# maps "sans" to DejaVu Sans, so there Liberation Sans (metric-compatible with
-# Arial) is asked for instead. The family has to be one the chosen device
-# knows: a plain pdf() errors with "invalid font type" on anything else.
-FAM <- if (Sys.info()[["sysname"]] == "Linux" &&
-           isTRUE(suppressWarnings(capabilities("cairo")))) "Liberation Sans" else "sans"
+# Arial, as requested. macOS (quartz) and Windows (GDI) resolve it directly;
+# on Linux fontconfig substitutes the metric-compatible Liberation Sans. Only a
+# plain pdf() has to fall back to "sans", because it knows just its own
+# PostScript families and aborts with "invalid font type" on anything else.
+FAM <- if (isTRUE(suppressWarnings(capabilities("aqua"))) ||
+           .Platform$OS.type == "windows" ||
+           isTRUE(suppressWarnings(capabilities("cairo")))) "Arial" else "sans"
 
 LW <- function(pt) pt * 96 / 72          # matplotlib points -> R lwd units
 CX <- function(pt) pt / 7                # point size -> cex (base ps = 7)
@@ -318,8 +318,6 @@ draw <- function() {
   points(day[ob], cd19[ob], pch = 22, cex = MS(3.0), bg = CO["cd19"],
          col = "white", lwd = LW(0.5))
   spine_l(c(-1.8, 28)); spine_b(-1.8); yticks(c(0, 10, 20))
-  labn(-140, 22, c("B-cell repopulation", "before relapse"), ha = "right",
-       cex = CX(5.9), col = CO["cd19"])
   ytitle(c("CD19+ B cells", "(cells/\u00B5L)"), -412.54, 13.091)
   pletter("C", dy = 1.06)
 
@@ -404,6 +402,6 @@ open_png <- function(file, w, h, res = 600) {
   invisible("default")
 }
 
-open_pdf(file.path(OUT, "Figure3_R.pdf"), 7.09, 7.35); draw(); invisible(dev.off())
-open_png(file.path(OUT, "Figure3_R.png"), 7.09, 7.35); draw(); invisible(dev.off())
+open_pdf(file.path(OUT, "TEC_GPA_R.pdf"), 7.09, 7.35); draw(); invisible(dev.off())
+open_png(file.path(OUT, "TEC_GPA_R.png"), 7.09, 7.35); draw(); invisible(dev.off())
 cat("ok\n")
